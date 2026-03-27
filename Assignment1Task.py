@@ -44,8 +44,8 @@ class Assignment1:
 
         # Finish simulation
         self.sim_active = False
-        with self.condition:
-            self.condition.notify_all()
+        with self.cond:
+            self.cond.notify_all()
 
         # Wait until all printer threads finish by joining them
         # Write code here
@@ -69,10 +69,11 @@ class Assignment1:
                 with self.outer.cond:
                     while self.outer.print_list.head is None and self.outer.sim_active:
                         self.outer.cond.wait()
-                        if not self.outer.sim_active:
-                            break
-                        self.printDox(self.printerID)
-                        self.outer.cond.notify_all()
+                    if not self.outer.sim_active:
+                        break
+                    self.printDox(self.printerID)
+                    self.outer.cond.notify_all()
+
                 # Grab the request at the head of the queue and print it
                 # Write code here
     
@@ -95,24 +96,27 @@ class Assignment1:
             while self.outer.sim_active:
                 # Machine sleeps for a random amount of time
                 self.machineSleep()
-                with self.outer.condition:
+                with self.outer.cond:
                     count = 0
                     curr = self.outer.print_list.head
                     while curr:
                         count += 1
                         curr = curr.next
                     while count >= self.outer.QUEUE_CAPACITY and self.outer.sim_active:
-                        self.outer.condition.wait()
+                        self.outer.cond.wait()
                         #Recalculate the queue length
                         count = 0
                         curr = self.outer.print_list.head
                         while curr:
                             count += 1
                             curr = curr.next
+                    if not self.outer.sim_active:
+                        break
+                    self.printRequest(self.machineID)
+                    self.outer.cond.notify_all()
                 # Machine wakes up and sends a print request
                 # Write code here
-                self.printRequest(self.machineID)
-                self.outer.condition.notify()
+                    
 
         def machineSleep(self):
             sleepSeconds = random.randint(1, self.outer.MAX_MACHINE_SLEEP)
