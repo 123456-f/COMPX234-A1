@@ -101,9 +101,18 @@ class Assignment1:
                     while curr:
                         count += 1
                         curr = curr.next
+                    while count >= self.outer.QUEUE_CAPACITY and self.outer.sim_active:
+                        self.outer.condition.wait()
+                        #Recalculate the queue length
+                        count = 0
+                        curr = self.outer.print_list.head
+                        while curr:
+                            count += 1
+                            curr = curr.next
                 # Machine wakes up and sends a print request
                 # Write code here
                 self.printRequest(self.machineID)
+                self.outer.condition.notify()
 
         def machineSleep(self):
             sleepSeconds = random.randint(1, self.outer.MAX_MACHINE_SLEEP)
