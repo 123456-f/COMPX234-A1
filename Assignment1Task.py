@@ -13,13 +13,15 @@ class Assignment1:
     MAX_PRINTER_SLEEP = 3    # Maximum sleep time for printers
     MAX_MACHINE_SLEEP = 5    # Maximum sleep time for machines
     QUEUE_CAPACITY = 5
-    
+
     # Initialise simulation variables
     def __init__(self):
         self.sim_active = True
         self.print_list = printList()  # Create an empty list of print requests
         self.mThreads = []             # list for machine threads
         self.pThreads = []             # list for printer threads
+        self.lock = threading.Lock()
+        self.condition = threading.Condition(self.lock)
 
     def startSimulation(self):
         # Create Machine and Printer threads
