@@ -95,6 +95,12 @@ class Assignment1:
             while self.outer.sim_active:
                 # Machine sleeps for a random amount of time
                 self.machineSleep()
+                with self.outer.condition:
+                    count = 0
+                    curr = self.outer.print_list.head
+                    while curr:
+                        count += 1
+                        curr = curr.next
                 # Machine wakes up and sends a print request
                 # Write code here
                 self.printRequest(self.machineID)
