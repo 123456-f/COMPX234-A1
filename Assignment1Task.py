@@ -20,8 +20,7 @@ class Assignment1:
         self.print_list = printList()  # Create an empty list of print requests
         self.mThreads = []             # list for machine threads
         self.pThreads = []             # list for printer threads
-        self.lock = threading.Lock()
-        self.condition = threading.Condition(self.lock)
+        self.cond = threading.Condition()
 
     def startSimulation(self):
         # Create Machine and Printer threads
@@ -67,23 +66,23 @@ class Assignment1:
                 # Simulate printer taking some time to print the document
                 self.printerSleep()
                 doc_to_print = None
-                with self.outer.condition:
+                with self.outer.cond:
                     while self.outer.print_list.head is None and self.outer.sim_active:
-                        self.outer.condition.wait()
+                        self.outer.cond.wait()
                         if not self.outer.sim_active:
                             break
-                        doc_to_print = self.outer.print_list.head
-                        self.outer.print_list.queuePrint(self.printerID)
+                        self.printDox(self.printerID)
+                        self.outer.cond.notify_all()
                 # Grab the request at the head of the queue and print it
                 # Write code here
-                        self.outer.condition.notify()
-                if doc_to_print:
-                    print(f"Printer ID: {self.printerID} : now available")
-
-
+    
         def printerSleep(self):
             sleepSeconds = random.randint(1, self.outer.MAX_PRINTER_SLEEP)
             time.sleep(sleepSeconds)
+        
+        def printDox(self, printerID):
+            print(f"Printer ID: {printerID} : now available")
+            self.outer.print_list.queuePrint(printerID)
 
     # Machine class
     class machineThread(threading.Thread):
